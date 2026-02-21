@@ -2,10 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Renvox</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/9d64f542ee.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    
+
+<nav>
+    <ul>
+        <li class="brand">
+            <img src="brand.png" alt="Renvox">
+            Renvox
+        </li>
+
+        <li class="search-container">
+            <input type="text" placeholder="Search songs...">
+        </li>
+
+        <li class="nav-right">
+            <a href="#" class="btn-login">Login</a>
+            <a href="#" class="btn-download">Download App</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container">
+    <div class="songList">
+        <h1>Welcome to Renvox</h1>
+
+        <div class="songitemcontainer" id="songContainer">
+            <!-- SONG ITEMS JS SE AAYENGE -->
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM PLAYER -->
+<div class="bottom">
+    <div class="player-controls">
+
+        <div class="control-buttons">
+            <i class="fa-solid fa-backward-step" id="previous"></i>
+            <i class="fa-solid fa-play-circle" id="masterPlay"></i>
+            <i class="fa-solid fa-forward-step" id="next"></i>
+        </div>
+
+        <div class="progress-container">
+            <span id="currentTime">0:00</span>
+            <input type="range" id="progressBar" value="0" min="0" max="100">
+            <span id="totalTime">0:00</span>
+        </div>
+
+        <div class="now-playing">
+            <span id="nowPlaying">No song playing</span>
+        </div>
+
+    </div>
+</div>
+
+<!-- HIDDEN YOUTUBE PLAYER -->
+<div id="ytplayer"></div>
+
+<!-- YOUTUBE API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<script src="script.js"></script>
 </body>
 </html>
