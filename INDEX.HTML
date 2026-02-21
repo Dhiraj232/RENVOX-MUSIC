@@ -12,11 +12,17 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="brand.png">
     <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome Icons -->
     <script src="https://kit.fontawesome.com/9d64f542ee.js" crossorigin="anonymous"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- SheetJS — Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
 
+    <!-- ======== NAVBAR ======== -->
     <nav>
         <ul>
             <li class="brand">
@@ -29,72 +35,246 @@
             </li>
 
             <li class="nav-right" style="list-style:none;">
-                <a href="#" class="btn-login">Login</a>
-                <a href="#" class="btn-download" id="downloadBtn" onclick="downloadApp(event)">⬇ Download App</a>
+                <a href="#" class="btn-login" onclick="event.preventDefault(); openLoginModal()">Login</a>
+                <a href="#" class="btn-download" onclick="showDownloadPopup(event)">⬇ Download App</a>
             </li>
         </ul>
     </nav>
 
+    <!-- ======== MAIN CONTENT ======== -->
     <div class="container">
         <div class="songList">
             <h1>Welcome to Renvox</h1>
-
             <div class="songitemcontainer" id="songContainer">
-                <!-- SONG ITEMS JS SE AAYENGE -->
+                <!-- Songs load from JS -->
             </div>
         </div>
     </div>
 
-    <!-- BOTTOM PLAYER -->
+    <!-- ======== BOTTOM PLAYER ======== -->
     <div class="bottom">
         <div class="player-controls">
-
             <div class="control-buttons">
                 <i class="fa-solid fa-backward-step" id="previous"></i>
                 <i class="fa-solid fa-play-circle" id="masterPlay"></i>
                 <i class="fa-solid fa-forward-step" id="next"></i>
             </div>
-
             <div class="progress-container">
                 <span id="currentTime">0:00</span>
                 <input type="range" id="progressBar" value="0" min="0" max="100">
                 <span id="totalTime">0:00</span>
             </div>
-
             <div class="now-playing">
                 <span id="nowPlaying">No song playing</span>
             </div>
-
         </div>
     </div>
 
-    <!-- AUDIO PLAYER SCRIPT -->
-    <script src="script.js"></script>
+    <!-- ================================================================
+         🔐 LOGIN MODAL
+    ================================================================ -->
+    <div id="loginModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeLoginModal()">✕</button>
+            <img src="brand.png" class="modal-logo">
+            <h2 class="modal-title">Renvox Music</h2>
+            <p class="modal-sub">Sign in to enjoy your music</p>
 
-    <!-- PWA INSTALL POPUP -->
-    <div id="pwaOverlay"
-        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
-        <div id="pwaBox"
-            style="background:#181818; border-radius:20px; padding:32px 28px; max-width:340px; width:90%; text-align:center; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:popIn .4s ease; position:relative;">
-            <button onclick="closePWA()"
-                style="position:absolute;top:14px;right:18px;background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;">✕</button>
-            <img src="brand.png" style="width:72px;border-radius:16px;margin-bottom:16px;">
-            <h2 style="color:white;font-size:20px;margin-bottom:8px;">Renvox Music</h2>
-            <p style="color:#aaa;font-size:14px;margin-bottom:24px;">Install karo aur kabhi bhi offline sunno! Bilkul
-                Spotify jaisa experience.</p>
-            <button id="installBtn" onclick="installPWA()"
-                style="background:#1DB954;color:white;border:none;padding:12px 32px;border-radius:25px;font-size:16px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:10px;">⬇
-                Install App</button>
-            <button onclick="closePWA()"
-                style="background:transparent;color:#aaa;border:1px solid #444;padding:10px 32px;border-radius:25px;font-size:14px;cursor:pointer;width:100%;">Baad
-                Mein</button>
+            <!-- Google Sign-In Button (rendered by GIS) -->
+            <div id="googleSignInDiv" style="display:flex; justify-content:center; margin:20px 0;"></div>
+
+            <p style="color:#555; font-size:12px; margin-top:8px;">
+                🔒 We only access your name & email
+            </p>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         📥 DOWNLOAD APP POPUP
+    ================================================================ -->
+    <div id="downloadPopup" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeDownloadPopup()">✕</button>
+            <div style="font-size:48px; margin-bottom:12px;">📱</div>
+            <h2 class="modal-title">Download Renvox App</h2>
+            <p class="modal-sub">Apne phone mein install karo aur offline bhi suno!</p>
+
+            <div class="download-options">
+                <button onclick="installPWA()" class="dl-btn dl-btn-green">
+                    <i class="fa-solid fa-download"></i> Install as App (PWA)
+                </button>
+                <button onclick="copyLink()" class="dl-btn dl-btn-dark">
+                    <i class="fa-solid fa-link"></i> Share Link
+                </button>
+                <div class="dl-steps">
+                    <p><strong>📌 Chrome me kaise install karein:</strong></p>
+                    <p>1️⃣ Chrome browser mein website kholo</p>
+                    <p>2️⃣ Address bar mein ⊕ icon dikhega → Click karo</p>
+                    <p>3️⃣ "Install" dabao — App phone pe save ho jaayegi!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         📊 EXPORT BUTTON (Hidden — for owner only)
+         Press Ctrl+Shift+E to export user data to Excel
+    ================================================================ -->
+    <button id="exportBtn" onclick="exportToExcel()" title="Export Users to Excel" style="position:fixed;bottom:90px;right:20px;background:#1DB954;color:white;border:none;
+               padding:10px 16px;border-radius:20px;cursor:pointer;font-size:13px;
+               box-shadow:0 4px 12px rgba(0,0,0,0.3);display:none;z-index:999;">
+        📊 Export Users
+    </button>
+
+    <!-- ================================================================
+         PWA INSTALL POPUP (Auto, on first visit)
+    ================================================================ -->
+    <div id="pwaOverlay" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closePWA()">✕</button>
+            <img src="brand.png" class="modal-logo">
+            <h2 class="modal-title">Install Renvox</h2>
+            <p class="modal-sub">Kabhi bhi, kahin bhi sunne ke liye install karo!</p>
+            <button id="installBtn" onclick="installPWA()" class="dl-btn dl-btn-green"
+                style="width:100%;margin-bottom:10px;">
+                ⬇ Install App
+            </button>
+            <button onclick="closePWA()" class="dl-btn dl-btn-outline" style="width:100%;">Baad Mein</button>
         </div>
     </div>
 
     <style>
+        /* === MODALS === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-box {
+            background: #1a1a1a;
+            border-radius: 22px;
+            padding: 36px 28px;
+            max-width: 360px;
+            width: 92%;
+            text-align: center;
+            box-shadow: 0 12px 50px rgba(0, 0, 0, 0.8);
+            animation: popIn .35s ease;
+            position: relative;
+            border: 1px solid #2a2a2a;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-logo {
+            width: 70px;
+            border-radius: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 16px rgba(29, 185, 84, 0.4);
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        .modal-sub {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* Download options */
+        .download-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dl-btn {
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform .15s, opacity .15s;
+        }
+
+        .dl-btn:hover {
+            transform: scale(1.03);
+            opacity: .92;
+        }
+
+        .dl-btn-green {
+            background: #1DB954;
+            color: white;
+        }
+
+        .dl-btn-dark {
+            background: #333;
+            color: white;
+        }
+
+        .dl-btn-outline {
+            background: transparent;
+            color: #888;
+            border: 1px solid #444;
+        }
+
+        .dl-steps {
+            background: #111;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: left;
+            color: #aaa;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        /* User avatar in nav */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 2px solid #1DB954;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Animation */
         @keyframes popIn {
             from {
-                transform: scale(0.8);
+                transform: scale(0.85);
                 opacity: 0;
             }
 
@@ -105,33 +285,33 @@
         }
     </style>
 
-    <script>
-        let deferredPrompt;
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script src="auth.js"></script>
 
-        // Capture install event
+    <script>
+        // ---- PWA Logic ----
+        let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Show popup after 2 seconds
             setTimeout(() => {
-                const overlay = document.getElementById('pwaOverlay');
-                overlay.style.display = 'flex';
-            }, 2000);
+                document.getElementById('pwaOverlay').style.display = 'flex';
+            }, 3000);
         });
 
         function installPWA() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choice) => {
-                    if (choice.outcome === 'accepted') {
-                        console.log('PWA installed!');
-                    }
+                deferredPrompt.userChoice.then(c => {
                     deferredPrompt = null;
                     closePWA();
+                    closeDownloadPopup();
                 });
             } else {
-                alert('Browser mein manually install karo:\nChrome → Menu (⋮) → "Add to Home Screen"');
+                alert('Chrome → Address bar mein ⊕ icon click karo → Install!');
                 closePWA();
+                closeDownloadPopup();
             }
         }
 
@@ -139,14 +319,42 @@
             document.getElementById('pwaOverlay').style.display = 'none';
         }
 
-        // Register Service Worker
+        function copyLink() {
+            navigator.clipboard.writeText(location.href)
+                .then(() => alert('✅ Link copy ho gaya! Kisi bhi browser mein paste karo.'))
+                .catch(() => alert('Link: ' + location.href));
+        }
+
+        // Ctrl+Shift+E → show export button
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+                const btn = document.getElementById('exportBtn');
+                btn.style.display = btn.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+
+        // Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(() => console.log('✅ Service Worker registered'))
-                    .catch((e) => console.log('SW error:', e));
+                    .then(() => console.log('✅ SW registered'))
+                    .catch(e => console.log('SW error:', e));
             });
         }
+
+        // Render Google Sign-In button after GIS loads
+        window.onload = () => {
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleGoogleLogin
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById('googleSignInDiv'),
+                    { theme: 'outline', size: 'large', shape: 'pill', width: 260 }
+                );
+            }
+        };
     </script>
 
 </body>
