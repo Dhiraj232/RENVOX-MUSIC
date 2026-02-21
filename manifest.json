@@ -1,0 +1,22 @@
+{
+  "name": "Renvox Music",
+  "short_name": "Renvox",
+  "description": "Classic Hindi Music Player — Stream anytime!",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#1DB954",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "brand.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "brand.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

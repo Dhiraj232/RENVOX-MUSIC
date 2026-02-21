@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <title>Renvox</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="theme-color" content="#1DB954">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Renvox">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="brand.png">
     <link rel="stylesheet" href="style.css">
     <script src="https://kit.fontawesome.com/9d64f542ee.js" crossorigin="anonymous"></script>
 </head>
@@ -65,6 +70,85 @@
 
     <!-- AUDIO PLAYER SCRIPT -->
     <script src="script.js"></script>
+
+    <!-- PWA INSTALL POPUP -->
+    <div id="pwaOverlay"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+        <div id="pwaBox"
+            style="background:#181818; border-radius:20px; padding:32px 28px; max-width:340px; width:90%; text-align:center; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:popIn .4s ease; position:relative;">
+            <button onclick="closePWA()"
+                style="position:absolute;top:14px;right:18px;background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;">✕</button>
+            <img src="brand.png" style="width:72px;border-radius:16px;margin-bottom:16px;">
+            <h2 style="color:white;font-size:20px;margin-bottom:8px;">Renvox Music</h2>
+            <p style="color:#aaa;font-size:14px;margin-bottom:24px;">Install karo aur kabhi bhi offline sunno! Bilkul
+                Spotify jaisa experience.</p>
+            <button id="installBtn" onclick="installPWA()"
+                style="background:#1DB954;color:white;border:none;padding:12px 32px;border-radius:25px;font-size:16px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:10px;">⬇
+                Install App</button>
+            <button onclick="closePWA()"
+                style="background:transparent;color:#aaa;border:1px solid #444;padding:10px 32px;border-radius:25px;font-size:14px;cursor:pointer;width:100%;">Baad
+                Mein</button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes popIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <script>
+        let deferredPrompt;
+
+        // Capture install event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show popup after 2 seconds
+            setTimeout(() => {
+                const overlay = document.getElementById('pwaOverlay');
+                overlay.style.display = 'flex';
+            }, 2000);
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choice) => {
+                    if (choice.outcome === 'accepted') {
+                        console.log('PWA installed!');
+                    }
+                    deferredPrompt = null;
+                    closePWA();
+                });
+            } else {
+                alert('Browser mein manually install karo:\nChrome → Menu (⋮) → "Add to Home Screen"');
+                closePWA();
+            }
+        }
+
+        function closePWA() {
+            document.getElementById('pwaOverlay').style.display = 'none';
+        }
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log('✅ Service Worker registered'))
+                    .catch((e) => console.log('SW error:', e));
+            });
+        }
+    </script>
+
 </body>
 
 </html>
