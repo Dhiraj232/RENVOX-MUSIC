@@ -699,3 +699,180 @@ nav ul {
     color: #555;
     font-size: 12px;
 }
+
+/* ======== MOBILE RESPONSIVENESS ======== */
+@media (max-width: 768px) {
+
+    /* Navbar */
+    nav ul {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 10px 15px;
+        gap: 10px;
+    }
+
+    .brand {
+        order: 1;
+        font-size: 18px;
+    }
+
+    .nav-right {
+        order: 2;
+        gap: 8px;
+        margin-left: auto;
+    }
+
+    .search-container {
+        order: 3;
+        width: 100%;
+        text-align: center;
+        margin-top: 5px;
+    }
+
+    .search-container input {
+        width: 100%;
+        max-width: 100%;
+        padding: 10px 16px;
+    }
+
+    .btn-login,
+    .btn-download {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    /* Main Container & Songs */
+    .container {
+        width: 95%;
+        margin: 10px auto 140px;
+        padding: 15px;
+        background-position: center;
+        background-size: cover;
+    }
+
+    .songItem {
+        width: 100%;
+        height: auto;
+        padding: 10px;
+    }
+
+    .song-number {
+        font-size: 12px;
+        width: 18px;
+    }
+
+    .songName {
+        font-size: 13px;
+    }
+
+    .songArtist {
+        font-size: 11px;
+    }
+
+    .songPlayBtn {
+        font-size: 16px;
+    }
+
+    /* Features Section */
+    .features-section {
+        width: 90%;
+        margin: 20px auto;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .feature-card {
+        padding: 20px 15px;
+    }
+
+    /* About Section */
+    .about-section {
+        width: 90%;
+        padding: 25px 20px;
+    }
+
+    .about-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .about-btn {
+        width: 100%;
+    }
+
+    /* Modals */
+    .modal-box {
+        width: 90%;
+        padding: 25px 20px;
+    }
+
+    .modal-logo {
+        width: 50px;
+    }
+
+    .modal-title {
+        font-size: 20px;
+    }
+
+    .dl-btn {
+        font-size: 13px;
+        padding: 10px 16px;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 30px 20px 0;
+        margin-bottom: 120px;
+    }
+
+    .footer-top {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        text-align: center;
+    }
+
+    .footer-brand {
+        justify-content: center;
+    }
+
+    .footer-socials {
+        justify-content: center;
+    }
+
+    .footer-list a {
+        justify-content: center;
+    }
+
+    /* Player Controls */
+    .bottom {
+        padding: 10px 15px;
+    }
+
+    .control-buttons {
+        gap: 15px;
+    }
+
+    .control-buttons i {
+        font-size: 24px;
+    }
+
+    #masterPlay {
+        font-size: 32px !important;
+    }
+
+    .now-playing {
+        font-size: 11px;
+    }
+
+    .progress-container {
+        gap: 8px;
+    }
+
+    .progress-container span {
+        font-size: 11px;
+        width: 30px;
+    }
+}
