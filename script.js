@@ -1,17 +1,47 @@
-let player;
-let songIndex = 0;
-let progressTimer;
+// ========================================
+// 🎵 RENVOX MUSIC PLAYER — HTML5 AUDIO
+// ========================================
 
-// 🎶 REAL HINDI SONGS (YouTube VIDEO IDs)
+// Free Classic Hindi Songs from archive.org (Public Domain)
 const songs = [
-  { name: "Hindi Song 1", videoId: "kJQP7kiw5Fk" },
-  { name: "Hindi Song 2", videoId: "JGwWNGJdvx8" },
-  { name: "Hindi Song 3", videoId: "RgKAFK5djSk" },
-  { name: "Hindi Song 4", videoId: "OPf0YbXqDm0" },
-  { name: "Hindi Song 5", videoId: "fRh_vgS2dFE" },
-  { name: "Hindi Song 6", videoId: "60ItHLz5WEA" }
+    {
+        name: "Main To Ek Khwab Hoon",
+        artist: "Mukesh | Kalyanji-Anandji",
+        src: "https://archive.org/download/lp_a-selection-of-hindi-film-songs_kalyanji-anandji-mukesh/disc1/01.01.%20Main%20To%20Ek%20Khwab%20Hoon.mp3"
+    },
+    {
+        name: "Chand Aahen Bharega",
+        artist: "Mukesh | Kalyanji-Anandji",
+        src: "https://archive.org/download/lp_a-selection-of-hindi-film-songs_kalyanji-anandji-mukesh/disc1/01.02.%20Chand%20Aahen%20Bharega.mp3"
+    },
+    {
+        name: "Jis Dil Men Basa Tha",
+        artist: "Mukesh | Kalyanji-Anandji",
+        src: "https://archive.org/download/lp_a-selection-of-hindi-film-songs_kalyanji-anandji-mukesh/disc1/01.03.%20Jis%20Dil%20Men%20Basa%20Tha.mp3"
+    },
+    {
+        name: "Diwanon Se Ye Mat Poochho",
+        artist: "Mukesh | Kalyanji-Anandji",
+        src: "https://archive.org/download/lp_a-selection-of-hindi-film-songs_kalyanji-anandji-mukesh/disc1/01.04.%20Diwanon%20Se%20Ye%20Mat%20Poochho.mp3"
+    },
+    {
+        name: "Mere Toote Hue Dil Se",
+        artist: "Mukesh | Kalyanji-Anandji",
+        src: "https://archive.org/download/lp_a-selection-of-hindi-film-songs_kalyanji-anandji-mukesh/disc1/01.05.%20Mere%20Toote%20Hue%20Dil%20Se.mp3"
+    },
+    {
+        name: "Chandan Sa Badan",
+        artist: "Mukesh | Kalyanji-Anandji",
+        src: "https://archive.org/download/lp_a-selection-of-hindi-film-songs_kalyanji-anandji-mukesh/disc1/01.06.%20Chandan%20Sa%20Badan.mp3"
+    },
+    {
+        name: "Mujh Ko Is Raat Ki",
+        artist: "Mukesh | Kalyanji-Anandji",
+        src: "https://archive.org/download/lp_a-selection-of-hindi-film-songs_kalyanji-anandji-mukesh/disc1/02.01.%20Mujh%20Ko%20Is%20Raat%20Ki.mp3"
+    }
 ];
 
+// ---- DOM Elements ----
 const songContainer = document.getElementById("songContainer");
 const masterPlay = document.getElementById("masterPlay");
 const progressBar = document.getElementById("progressBar");
@@ -19,84 +49,125 @@ const currentTimeEl = document.getElementById("currentTime");
 const totalTimeEl = document.getElementById("totalTime");
 const nowPlayingEl = document.getElementById("nowPlaying");
 
-// LOAD SONG LIST
+// ---- HTML5 Audio Object ----
+const audio = new Audio();
+let currentIndex = -1;
+let isPlaying = false;
+
+// ---- Build Song List ----
 songs.forEach((song, i) => {
     songContainer.innerHTML += `
-        <div class="songItem">
-            <span class="songName">${song.name}</span>
-            <i class="fa-solid fa-play" onclick="playSong(${i})"></i>
-        </div>
-    `;
+    <div class="songItem" id="song-${i}">
+      <div class="songInfo">
+        <span class="songName">${song.name}</span>
+        <span class="songArtist">${song.artist}</span>
+      </div>
+      <i class="fa-solid fa-play songPlayBtn" id="btn-${i}" onclick="playSong(${i})"></i>
+    </div>
+  `;
 });
 
-// YOUTUBE PLAYER
-function onYouTubeIframeAPIReady() {
-    player = new YT.Player("ytplayer", {
-        height: "0",
-        width: "0",
-        videoId: songs[songIndex].videoId,
-        playerVars: { autoplay: 0, controls: 0 },
-        events: {
-            onStateChange: onPlayerStateChange
-        }
-    });
-}
+// ---- Play a Song ----
+function playSong(index) {
+    // Reset previous song's button
+    if (currentIndex >= 0) {
+        document.getElementById(`btn-${currentIndex}`).className = "fa-solid fa-play songPlayBtn";
+        document.getElementById(`song-${currentIndex}`).classList.remove("active-song");
+    }
 
-function playSong(index){
-    songIndex = index;
-    player.loadVideoById(songs[songIndex].videoId);
+    currentIndex = index;
+    audio.src = songs[index].src;
+    audio.play();
+    isPlaying = true;
+
+    // Update UI
     masterPlay.className = "fa-solid fa-pause-circle";
-    nowPlayingEl.innerText = songs[songIndex].name;
+    nowPlayingEl.innerText = `🎵 ${songs[index].name} — ${songs[index].artist}`;
+    document.getElementById(`btn-${index}`).className = "fa-solid fa-pause songPlayBtn";
+    document.getElementById(`song-${index}`).classList.add("active-song");
 }
 
-// PLAY / PAUSE
-masterPlay.addEventListener("click", ()=>{
-    if(player.getPlayerState() !== YT.PlayerState.PLAYING){
-        player.playVideo();
-        masterPlay.className = "fa-solid fa-pause-circle";
-    } else {
-        player.pauseVideo();
+// ---- Master Play / Pause ----
+masterPlay.addEventListener("click", () => {
+    if (currentIndex === -1) {
+        playSong(0);
+        return;
+    }
+
+    if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
         masterPlay.className = "fa-solid fa-play-circle";
+        document.getElementById(`btn-${currentIndex}`).className = "fa-solid fa-play songPlayBtn";
+    } else {
+        audio.play();
+        isPlaying = true;
+        masterPlay.className = "fa-solid fa-pause-circle";
+        document.getElementById(`btn-${currentIndex}`).className = "fa-solid fa-pause songPlayBtn";
     }
 });
 
-// NEXT / PREVIOUS
-document.getElementById("next").addEventListener("click", ()=>{
-    songIndex = (songIndex + 1) % songs.length;
-    playSong(songIndex);
+// ---- Next ----
+document.getElementById("next").addEventListener("click", () => {
+    const nextIndex = (currentIndex + 1) % songs.length;
+    playSong(nextIndex);
 });
 
-document.getElementById("previous").addEventListener("click", ()=>{
-    songIndex = (songIndex - 1 + songs.length) % songs.length;
-    playSong(songIndex);
+// ---- Previous ----
+document.getElementById("previous").addEventListener("click", () => {
+    const prevIndex = (currentIndex - 1 + songs.length) % songs.length;
+    playSong(prevIndex);
 });
 
-// PROGRESS & TIME (YouTube)
-function onPlayerStateChange(event){
-    if(event.data === YT.PlayerState.PLAYING){
-        clearInterval(progressTimer);
-        progressTimer = setInterval(updateProgress, 1000);
+// ---- Progress Bar Update ----
+audio.addEventListener("timeupdate", () => {
+    if (audio.duration) {
+        progressBar.value = (audio.currentTime / audio.duration) * 100;
+        currentTimeEl.innerText = formatTime(audio.currentTime);
+        totalTimeEl.innerText = formatTime(audio.duration);
     }
-}
-
-function updateProgress(){
-    const current = player.getCurrentTime();
-    const duration = player.getDuration();
-
-    if(duration){
-        progressBar.value = (current / duration) * 100;
-        currentTimeEl.innerText = formatTime(current);
-        totalTimeEl.innerText = formatTime(duration);
-    }
-}
-
-progressBar.addEventListener("input", ()=>{
-    const seekTo = (progressBar.value / 100) * player.getDuration();
-    player.seekTo(seekTo, true);
 });
 
-function formatTime(sec){
+// ---- Seek ----
+progressBar.addEventListener("input", () => {
+    audio.currentTime = (progressBar.value / 100) * audio.duration;
+});
+
+// ---- Auto-next when song ends ----
+audio.addEventListener("ended", () => {
+    const nextIndex = (currentIndex + 1) % songs.length;
+    playSong(nextIndex);
+});
+
+// ---- Format Time ----
+function formatTime(sec) {
     const m = Math.floor(sec / 60);
     const s = Math.floor(sec % 60);
     return `${m}:${s < 10 ? "0" + s : s}`;
+}
+
+// ---- Search Filter ----
+const searchInput = document.querySelector(".search-container input");
+if (searchInput) {
+    searchInput.addEventListener("input", () => {
+        const query = searchInput.value.toLowerCase();
+        songs.forEach((song, i) => {
+            const item = document.getElementById(`song-${i}`);
+            if (item) {
+                const match = song.name.toLowerCase().includes(query) || song.artist.toLowerCase().includes(query);
+                item.style.display = match ? "flex" : "none";
+            }
+        });
+    });
+}
+
+// ---- Download App ----
+function downloadApp(e) {
+    e.preventDefault();
+    const link = document.createElement('a');
+    link.href = 'dillaghna.mp3';
+    link.download = 'RenvoxApp.mp3';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
